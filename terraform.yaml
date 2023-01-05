@@ -1,0 +1,42 @@
+apiVersion: infra.contrib.fluxcd.io/v1alpha1
+kind: Terraform
+metadata:
+  name: job-a
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 10s
+  approvePlan: auto
+  path: ./modules/job-a
+  sourceRef:
+    kind: GitRepository
+    name: my-repo
+    namespace: flux-system
+  destroyResourcesOnDeletion: true
+  writeOutputsToSecret:
+    name: job-a-outputs
+    outputs:
+      - my_list
+---
+apiVersion: infra.contrib.fluxcd.io/v1alpha1
+kind: Terraform
+metadata:
+  name: job-b
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 10s
+  approvePlan: auto
+  path: ./modules/job-b
+  sourceRef:
+    kind: GitRepository
+    name: my-repo
+    namespace: flux-system
+  destroyResourcesOnDeletion: true
+  readInputsFromSecrets:
+    - name: job-a-outputs
+      as: job_a
+  dependsOn:
+    - name: job-a
+  values:
+    my_list: ${{ .job_a.my_list }}
