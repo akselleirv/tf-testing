@@ -4,3 +4,12 @@ output "my_list" {
     "entry-2"
   ]
 }
+
+output "complex" {
+  value = {
+    inner = {
+      array  = ["hello", "world"]
+      number = 42
+    }
+  }
+}
